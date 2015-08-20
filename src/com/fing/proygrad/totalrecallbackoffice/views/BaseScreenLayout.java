@@ -25,7 +25,7 @@ public abstract class BaseScreenLayout extends VerticalLayout{
 	 }
 	
 	 private void initRoot(){
-		 setSizeFull();
+		 //setSizeFull();
 	     setStyleName("base-screen");
 	     addTitle();
 	     initComponents();
@@ -57,7 +57,8 @@ public abstract class BaseScreenLayout extends VerticalLayout{
 	 
 	 private void resizeComponent(){
 		 Component comp = (Component)this.getComponent(this.getComponentCount()-1);
-	     setExpandRatio(comp, 1.0f);
+	     setExpandRatio(comp, 1.0f);	     
+	     setSpacing(true);
 	 }
 
 	 

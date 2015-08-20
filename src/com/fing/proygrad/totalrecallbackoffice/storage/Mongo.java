@@ -9,6 +9,7 @@ import org.bson.Document;
 import org.bson.conversions.Bson;
 
 import com.mongodb.BasicDBObject;
+import com.mongodb.Block;
 import com.mongodb.MongoClient;
 import com.mongodb.MongoClientURI;
 import com.mongodb.client.FindIterable;
@@ -41,22 +42,21 @@ public class Mongo {
 	
 	public List<String> listUserTypes(String userId){
 		
-		List<String> userTypes = new ArrayList<String>();
+		final List<String> userTypes = new ArrayList<String>();		
 		
-		//Map<String, Object> wantedFields = new HashMap<String, Object>();
+		FindIterable<Document> iterable = db.getCollection(COLLECTION_NAME).find(new Document("user_id", userId)).projection(Projections.fields(Projections.exclude("_id" , "user_id")));				
 		
-		BasicDBObject includeKeys = new BasicDBObject();
-		
-		FindIterable<Document> docs = db.getCollection(COLLECTION_NAME).find(new Document("user_id", userId)).projection(Projections.fields(Projections.exclude("_id" , "user_id")));
-		
-		Document doc;
-		
-		if(docs != null){
-			while(docs.iterator().hasNext()){
-				doc = docs.iterator().next();
-				userTypes.add(doc.toJson());
+		iterable.forEach(new Block<Document>(){
+
+			@Override
+			public void apply(Document t) {
+				userTypes.add(t.toJson());
+				
 			}
-		}
+			
+			
+		});
+		
 		
 		return userTypes;
 	}
