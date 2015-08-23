@@ -55,7 +55,7 @@
 		
 		<dependency org="com.google.code.gson" name="gson" rev="2.3.1"/>
 
-		
+		<dependency org="org.mongodb.morphia" name="morphia" rev="1.0.1" />
 		
 	</dependencies>
 </ivy-module>

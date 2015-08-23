@@ -54,16 +54,14 @@
           line-height:    100%;
           background-color:     lighten($base-color, 30%);
           text-align:    CENTER;
-                    	.v-spacing {
-    height: 30px;
-}
+          .v-spacing {
+		    height: 30px;
+		  }
           .v-verticallayout{
             //width:    100%;
             height:    100%;
           	background-color: inherit;
-          	text-align: CENTER;
-
-
+          	//text-align: CENTER;
           }
 
       }

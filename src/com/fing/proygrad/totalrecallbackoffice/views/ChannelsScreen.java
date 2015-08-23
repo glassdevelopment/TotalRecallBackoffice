@@ -2,28 +2,13 @@ package com.fing.proygrad.totalrecallbackoffice.views;
 
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import org.json.JSONObject;
-
+import com.fing.proygrad.totalrecallbackoffice.storage.Channels;
+import com.fing.proygrad.totalrecallbackoffice.util.Consts;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.vaadin.event.ItemClickEvent;
@@ -33,10 +18,10 @@ import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalLayout;
 import com.vaadin.ui.Label;
 import com.vaadin.ui.Panel;
-import com.vaadin.ui.PopupView;
 import com.vaadin.ui.Table;
 import com.vaadin.ui.VerticalLayout;
 import com.vaadin.ui.Button.ClickEvent;
+import com.vaadin.ui.Window.CloseEvent;
 import com.vaadin.ui.Window;
 import com.vaadin.ui.themes.Reindeer;
 
@@ -44,7 +29,7 @@ public class ChannelsScreen extends BaseScreenLayout{
 
 	
 	private static final long serialVersionUID = 3084673053358943678L;
-	private static final String TITLE = "Canales de datos";
+	
 	
 	private List<JSONObject> channels;
 	private HorizontalLayout container;
@@ -55,14 +40,15 @@ public class ChannelsScreen extends BaseScreenLayout{
 	
 	
 	public ChannelsScreen() {
-		super(TITLE);
+		super("channels.screen.label.title");
 		init();
 	}
 	
 	private void init(){
 		initComponents();
 	}
-
+	
+	
 	@Override
 	protected void initComponents(){
 		//removeAllComponents();
@@ -87,12 +73,14 @@ public class ChannelsScreen extends BaseScreenLayout{
 		channelsTable.setSelectable(true);
 		channelsTable.setMultiSelect(false);
 		channelsTable.setImmediate(true);
+
+		channelsTable.addContainerProperty("Name", String.class, null);
+		channelsTable.addContainerProperty("Actions",  HorizontalLayout.class, null);
 		
-		channelsTable.addContainerProperty("Nombre", String.class, null);
-		channelsTable.addContainerProperty("Acciones",  HorizontalLayout.class, null);
-		
-		channelsTable.setVisibleColumns(new Object[] { "Nombre", "Acciones" });
-		channelsTable.setColumnHeaders(new String[] { "Nombre", "Acciones" });
+
+		channelsTable.setVisibleColumns(new Object[] { "Name", "Actions" });
+		channelsTable.setColumnHeaders(new String[] { config.getMessage("channels.screen.table.channelstable.columheader.name"), 
+													config.getMessage("channels.screen.table.channelstable.columheader.actions") });
 		
 		channelsTable.addItemClickListener(new ItemClickListener() {
 			
@@ -108,36 +96,18 @@ public class ChannelsScreen extends BaseScreenLayout{
 		populateTable();
 	}
 	
-	private JSONObject createAttr(int i){
-		
-		JSONObject toRet = new JSONObject();
-		for(int j = 0; j < 5; j++){
-			toRet.put("attr" + j, "attrrr" + i + j);
-		}
-		
-		
-		return toRet;
-	}
+
 	
 	private void populateTable(){
 		
-		channels = new ArrayList<JSONObject>();
-		JSONObject obj;
-		for(int i = 0; i < 10; i++){
-			obj = new JSONObject();
-			obj.put("Nombre", "Nombre " + i);
-			obj.put("id", i);
-			obj.put("Atributos", createAttr(i));
-			channels.add(obj);
-		}
+		channels = generateChannels();
 		
+		int i = 0;
 		for(JSONObject elem : channels){
-			channelsTable.addItem(new Object[]{elem.get("Nombre"), createActionsItem()} , new Integer((Integer)elem.get("id")));
+			channelsTable.addItem(new Object[]{elem.get("type_name"), createActionsItem()} , i);
+			i++;
 		}
 		
-//		for(int i = 0; i < 10; i++){
-//			channelsTable.addItem(new Object[]{"Nombre " + i, createActionsItem()} , new Integer(i));			
-//		}
 		
 		if(channelsTable.size() > 10){
 			channelsTable.setPageLength(10);
@@ -146,13 +116,72 @@ public class ChannelsScreen extends BaseScreenLayout{
 		}
 	}
 	
+	private List<JSONObject> generateChannels(){
+		
+		List<String> chans = new Channels().getUserChannels("123");
+		
+		List<JSONObject> aux = new ArrayList<JSONObject>();
+		for(String chan : chans){
+			aux.add(new JSONObject(chan));
+		}
+		
+		List<JSONObject> toRet = new ArrayList<JSONObject>();
+		for(JSONObject obj : aux){
+			toRet.add(createFullJSON(obj, aux));
+		}
+		
+		return toRet;
+	}
+	
+	private JSONObject createFullJSON(JSONObject json, List<JSONObject> vals){
+		JSONObject toRet = new JSONObject();
+		
+		String val;
+		String key;
+		JSONObject complex = null;
+		Iterator<String> it = json.keys();
+		while(it.hasNext()){
+			key = it.next();
+			val = json.getString(key);
+			
+			
+			
+			if(!key.equals("type_name") && isComplexType(val)){
+				complex = getJsonWithTypeName(val, vals);
+				toRet.put(key, createFullJSON(complex, vals));
+			}else{
+				toRet.put(key, val);
+			}
+		}
+		
+		return toRet;
+		
+	}
+	
+	private JSONObject getJsonWithTypeName(String val, List<JSONObject> vals) {
+		
+
+		for(JSONObject aux : vals){
+			if(aux.getString("type_name").equals(val)){
+				return aux;
+			}
+			
+		}
+		
+		return null;
+	}
+
+	private boolean isComplexType(String type){
+		return !(new Consts().getTypes().contains(type)) ;
+	}
+	
 	private HorizontalLayout createActionsItem(){
 		Button edit;
 		Button delete;
 		
-		edit = new Button("editar");
+		edit = new Button(config.getMessage("channels.screen.button.edit.caption"));
 		edit.setStyleName(Reindeer.BUTTON_LINK);
-		delete = new Button("borrar");
+		delete = new Button(config.getMessage("channels.screen.button.delete.caption"));
 		delete.setStyleName(Reindeer.BUTTON_LINK);
 		HorizontalLayout lay = new HorizontalLayout();
 		
@@ -175,6 +204,7 @@ public class ChannelsScreen extends BaseScreenLayout{
         
  
         details.setContent(content);
+        
         details.setVisible(true);
         
 //        if(container.getComponentCount() == 1){
@@ -188,9 +218,8 @@ public class ChannelsScreen extends BaseScreenLayout{
 	
 	private void createInfoPanel(){
 		if(container.getComponentCount() == 1){
-			details = new Panel("Detalles");
 				
-			details = new Panel("Detalles");
+			details = new Panel(config.getMessage("channels.screen.panel.details.caption"));
 			details.setHeight(100.0f, Unit.PERCENTAGE);
 	 
 			content = new VerticalLayout();
@@ -205,42 +234,33 @@ public class ChannelsScreen extends BaseScreenLayout{
 	}
 	
 	private String getFormatted(JSONObject jsonn){
-		
-		String compactJson = "{\"playerID\":1234,\"name\":\"Test\",\"itemList\":[{\"itemID\":1,\"name\":\"Axe\",\"atk\":12,\"def\":0},{\"itemID\":2,\"name\":\"Sword\",\"atk\":5,\"def\":5},{\"itemID\":3,\"name\":\"Shield\",\"atk\":0,\"def\":10}]}";
-		
+				
 		JsonParser parser = new JsonParser();
-        JsonObject json = parser.parse(jsonn.toString()).getAsJsonObject();
-        
-
-
+        JsonObject json = parser.parse(jsonn.toString()).getAsJsonObject();       
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String prettyJson = gson.toJson(json);
-        System.out.println(prettyJson);
 		
-//		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-//		JsonParser jp = new JsonParser();
-//		JsonElement je = jp.parse(json.toString());
-//		System.out.println(jsonn.toString());
-//		String a = gson.toJson(jsonn.toString());
-//
-//		System.out.println("hola \t hola");
-//		System.out.println(a);
 		return prettyJson;
 
 	}
 	
 	private void createButton(){
 		
-		addChannel = new Button("Crear canal");
+		addChannel = new Button(config.getMessage("channels.screen.button.addchannel.caption"));
 		addChannel.addClickListener(new Button.ClickListener() {
 			
 			@Override
 			public void buttonClick(ClickEvent event) {
-				//Window win = new Window("Nuevo Canal", new AddChannel());
-//				win.center();
-//				win.setHeight("60%");
-//				win.setWidth("70%");
-				getUI().addWindow(new AddChannel());
+				
+				Window w = new AddChannelWindow();
+				w.addCloseListener(new Window.CloseListener() {
+					
+					@Override
+					public void windowClose(CloseEvent e) {
+						initComponents();
+					}
+				});
+				getUI().addWindow(w);
 				
 			}
 		});

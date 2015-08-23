@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import com.fing.proygrad.totalrecallbackoffice.views.ChannelsScreen;
 import com.fing.proygrad.totalrecallbackoffice.views.DevicesScreen;
 import com.fing.proygrad.totalrecallbackoffice.views.ProfileScreen;
+import com.fing.proygrad.totalrecallbackoffice.views.UserRegistrationScreen;
 import com.vaadin.server.FontAwesome;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.HorizontalSplitPanel;
@@ -21,7 +22,7 @@ public class VerticalMenu extends VerticalLayout{
     private static final String PROFILE_BUTTON;
     private static final String DATA_BUTTON;
     private static final String DEVICES_BUTTON;
-    private HorizontalSplitPanel parent;
+    private static final String REGISTRATION_BUTTON;
     private VerticalLayout lay;
     
     static{
@@ -29,6 +30,8 @@ public class VerticalMenu extends VerticalLayout{
         PROFILE_BUTTON = "Perfil";
         DATA_BUTTON = "Datos";
         DEVICES_BUTTON = "Dispositivos";
+        REGISTRATION_BUTTON = "Registrarse";
+        
     }
     //initialize root & other components
     public VerticalMenu(){
@@ -38,7 +41,6 @@ public class VerticalMenu extends VerticalLayout{
     private void initRoot(){
         setStyleName("vertical-menu");
         lay = this;
-        parent = (HorizontalSplitPanel)this.getParent();
     }
     private void initComponents(){
         initButtons();
@@ -49,6 +51,7 @@ public class VerticalMenu extends VerticalLayout{
     	Button profile = new Button(PROFILE_BUTTON);
     	Button data = new Button(DATA_BUTTON);
     	Button devices = new Button(DEVICES_BUTTON);
+    	Button registration = new Button(REGISTRATION_BUTTON);
     	
     	profile.addClickListener(new Button.ClickListener() {
 			
@@ -79,9 +82,22 @@ public class VerticalMenu extends VerticalLayout{
 			}
 		});
     	
+    	registration.addClickListener(new Button.ClickListener() {
+			
+			@Override
+			public void buttonClick(ClickEvent event) {
+				//((HorizontalSplitPanel)lay.getParent()).removeComponent(((HorizontalSplitPanel)lay.getParent()).getSecondComponent());
+				((HorizontalSplitPanel)lay.getParent()).setSecondComponent(new UserRegistrationScreen());
+				
+			}
+		});
+    	
+    	
+    	
     	addComponent(profile);
     	addComponent(data);
     	addComponent(devices);
+    	addComponent(registration);
     	
     	Button but = (Button)getComponent(getComponentCount()-1);
         setExpandRatio(but, 1.0f);
@@ -91,55 +107,6 @@ public class VerticalMenu extends VerticalLayout{
         setSizeFull();
     }
     
-    private void initButtons2(){
-    	
-    	
-        buttons    = new ArrayList<>();
-        
-        Button profile = new Button("Perfil");
-        Button data = new Button("Datos");
-        Button devices = new Button("Dispositivos");
-        
-        buttons.add(profile);
-        //setExpandRatio(profile, 1.0f);
-        buttons.add(data);
-        //setExpandRatio(data, 1.0f);
-        buttons.add(devices);
-        //setExpandRatio(devices, 1.0f);
-        
-        
-        for(Button button:buttons){
-        	
-        	button.addClickListener(new Button.ClickListener() {
-				
-				@Override
-				public void buttonClick(ClickEvent event) {
-					Notification.show("i'm "+event.getButton().getCaption()+" Button");
-					
-				}
-			});
-        	
-//            button.addClickListener((clickEvent)->{
-//                Notification.show("i'm "+button.getCaption()+" Button");
-//            });
-//            switch(button.getCaption()){
-//            case "Perfil":{button.setIcon(FontAwesome.USER);}break;
-//            case "Datos":{button.setIcon(FontAwesome.DATABASE);}break;
-//            case "Dispositivos":{button.setIcon(FontAwesome.ANDROID);}break;
-//            
-//            }
-            addComponent(button);
-            
-        }
-        
-        Button but = (Button)getComponent(getComponentCount()-1);
-        setExpandRatio(but, 1.0f);
-        
-        
-        
-        setSizeFull();
-        
-    }
-    private ArrayList<Button> buttons;
+
 
 }

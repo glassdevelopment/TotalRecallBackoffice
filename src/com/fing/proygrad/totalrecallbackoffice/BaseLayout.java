@@ -1,11 +1,7 @@
 package com.fing.proygrad.totalrecallbackoffice;
 
-import com.fing.proygrad.totalrecallbackoffice.views.BaseScreenLayout;
-import com.fing.proygrad.totalrecallbackoffice.views.DevicesScreen;
-import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
 import com.vaadin.ui.HorizontalSplitPanel;
-import com.vaadin.ui.Label;
 import com.vaadin.ui.VerticalLayout;
 
 public class BaseLayout extends VerticalLayout{
